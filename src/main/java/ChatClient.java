@@ -1,6 +1,9 @@
 import javax.swing.*;
 import javax.swing.text.Document;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 
 public class ChatClient extends JFrame {
     private static final int WINDOW_HEIGHT = 420;
@@ -45,10 +48,21 @@ public class ChatClient extends JFrame {
 
         textInput.setSize(new Dimension(300,35));
         textInput.setFont(new Font("Times New Roman",Font.BOLD,18));
+        btnInput.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textMessages.append(textInput.getText()+"\n");
+                textInput.setText("");
+            }
+
+            void revalidate() {
+
+            }
+        });
+
         boxHorizonal.add(textInput);
         boxHorizonal.add(btnInput);
         pnlFooter.add(boxHorizonal);
-
 
         pnlCenter.add(textMessages);
 
@@ -78,5 +92,8 @@ public class ChatClient extends JFrame {
         pnlHeader.add(pnlAddress);
         pnlHeader.add(pnlLogin);
         return panel;
+    }
+    public void keyEnter(ActiveEvent e){
+
     }
 }
