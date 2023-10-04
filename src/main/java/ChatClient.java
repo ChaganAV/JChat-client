@@ -4,9 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -117,13 +115,22 @@ public class ChatClient extends JFrame {
         pnlHeader.add(pnlLogin);
         return panel;
     }
+    private void responseMessage(String msg){
+        textMessages.append(msg + "\n");
+    }
     private boolean sendMessage(String msg){
         Socket client;
         try {
             client = new Socket(textAddress.getText(),Integer.parseInt(textPort.getText()));
+            InputStream in = client.getInputStream();
             PrintWriter pout = new PrintWriter(client.getOutputStream(), true);
             pout.println(msg);
             pout.flush();
+            BufferedReader bin = new BufferedReader(new InputStreamReader(in));
+            String response = bin.readLine();
+            responseMessage(response);
+            in.close();
+            bin.close();
             pout.close();
             client.close();
             return true;
