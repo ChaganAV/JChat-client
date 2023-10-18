@@ -26,11 +26,11 @@ public class ChatClient extends JFrame {
     JPanel pnlFooter = new JPanel(new GridLayout(1,5));
     JTextField textAddress;
     JTextField textPort;
-    JTextField textLogin = new JTextField();
+    JTextField textLogin = new JTextField("NICK");
     JButton btnBoard = new JButton("Disconnected");
     Color colorDefault = btnBoard.getBackground();
     JTextField textPassword = new JTextField();
-    JButton btnLogin = new JButton("login");
+    JButton btnLogin = new JButton("Connect");
     // endregion
 
     // region center
@@ -85,6 +85,7 @@ public class ChatClient extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if(e.getActionCommand() != null) {
                     if(textInput.getText().trim().length()>0) {
+                        sendMessage(textInput.getText());
                         textMessages.append(textInput.getText() + "\n");
                         textInput.setText("");
                     }
@@ -95,6 +96,7 @@ public class ChatClient extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(textInput.getText().trim().length()>0) {
+                    sendMessage(textInput.getText());
                     textMessages.append(textInput.getText() + "\n");
                     textInput.setText("");
                 }
@@ -153,33 +155,9 @@ public class ChatClient extends JFrame {
             } else {
                 textMessages.append(client.getErrorServer() + "\n");
             }
-
-
     }
     private void sendMessage(String msg){
         client.sendMessage(msg);
         getMessage();
-//        Socket client;
-//        try {
-//            client = new Socket(textAddress.getText(),Integer.parseInt(textPort.getText()));
-//            InputStream in = client.getInputStream();
-//            PrintWriter pout = new PrintWriter(client.getOutputStream(), true);
-//            pout.println(msg);
-//            pout.flush();
-//            BufferedReader bin = new BufferedReader(new InputStreamReader(in));
-//            String response = bin.readLine();
-//            responseMessage(response);
-//            in.close();
-//            bin.close();
-//            pout.close();
-//            client.close();
-//            return true;
-//        }catch (UnknownHostException e) {
-//            textMessages.append("Сервер недоступен\n");
-//            return false;
-//        }catch (IOException e){
-//            textMessages.append("Сервер недоступен\n");
-//            return false;
-//        }
     }
 }
