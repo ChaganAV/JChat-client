@@ -9,40 +9,53 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ChatClient extends JFrame {
+    // region final
     private static final int WINDOW_HEIGHT = 420;
     private static final int WINDOW_WIDTH = 360;
     private static final int WINDOW_POSX = 800;
     private static final int WINDOW_POSY = 300;
-    private static final String URL = "192.168.9.104";
-    private static final int PORT = 56565;
+//    private static final String URL = "158.160.82.178";
+//    private static final int PORT = 55555;
+    // endregion
 
-    // header
+    // region header
+    private Client client;
     JPanel pnlHeader = new JPanel(new GridLayout(2,1));
     JPanel pnlAddress = new JPanel(new GridLayout(1,3));
     JPanel pnlLogin = new JPanel(new GridLayout(1,3));
     JPanel pnlFooter = new JPanel(new GridLayout(1,5));
-    JTextField textAddress = new JTextField(URL);
-    JTextField textPort = new JTextField(String.valueOf(PORT));
+    JTextField textAddress;
+    JTextField textPort;
     JTextField textLogin = new JTextField();
+    JButton btnBoard = new JButton("Disconnected");
+    Color colorDefault = btnBoard.getBackground();
     JTextField textPassword = new JTextField();
     JButton btnLogin = new JButton("login");
+    // endregion
 
-    // центр
+    // region center
     JPanel pnlCenter = new JPanel();
     JTextArea textMessages = new JTextArea();
     Document doc = textMessages.getDocument();
+    // endregion
 
-    // footer
+    // region footer
     Container boxHorizonal = Box.createHorizontalBox();
     JTextField textInput = new JTextField(20);
     JButton btnInput = new JButton("send");
+    // endregion
 
-    ChatClient(){
+    ChatClient(Client client){
+        this.client = client;
         setting();
+
+        textAddress = new JTextField(client.getUrl());
+        textPort = new JTextField(String.valueOf(client.getPort()));
 
         pnlAddress.add(textAddress);
         pnlAddress.add(textPort);
-        pnlAddress.add(Box.createHorizontalStrut(10));
+        btnBoard.setEnabled(false);
+        pnlAddress.add(btnBoard);
 
         pnlLogin.add(textLogin);
         pnlLogin.add(textPassword);
@@ -53,15 +66,27 @@ public class ChatClient extends JFrame {
 
         textInput.setSize(new Dimension(300,35));
         textInput.setFont(new Font("Times New Roman",Font.BOLD,18));
+        // region actions
+        btnLogin.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!client.getConnection()) {
+                    connected();
+                }else{
+                    client.disconnected();
+                    btnBoard.setBackground(colorDefault);
+                    btnBoard.setText("Disconnected");
+                    btnLogin.setText("Login");
+                }
+            }
+        });
         textInput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(e.getActionCommand() != null) {
                     if(textInput.getText().trim().length()>0) {
-                        if(sendMessage(textInput.getText().trim())){
-                            textMessages.append(textInput.getText() + "\n");
-                            textInput.setText("");
-                        }
+                        textMessages.append(textInput.getText() + "\n");
+                        textInput.setText("");
                     }
                 }
             }
@@ -70,10 +95,8 @@ public class ChatClient extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(textInput.getText().trim().length()>0) {
-                    if(sendMessage(textInput.getText().trim())) {
-                        textMessages.append(textInput.getText() + "\n");
-                        textInput.setText("");
-                    }
+                    textMessages.append(textInput.getText() + "\n");
+                    textInput.setText("");
                 }
             }
 
@@ -81,6 +104,7 @@ public class ChatClient extends JFrame {
 
             }
         });
+        // endregion
 
         boxHorizonal.add(textInput);
         boxHorizonal.add(btnInput);
@@ -115,31 +139,47 @@ public class ChatClient extends JFrame {
         pnlHeader.add(pnlLogin);
         return panel;
     }
-    private void responseMessage(String msg){
+    private void getMessage(){
+        String msg = client.getResponse();
         textMessages.append(msg + "\n");
     }
-    private boolean sendMessage(String msg){
-        Socket client;
-        try {
-            client = new Socket(textAddress.getText(),Integer.parseInt(textPort.getText()));
-            InputStream in = client.getInputStream();
-            PrintWriter pout = new PrintWriter(client.getOutputStream(), true);
-            pout.println(msg);
-            pout.flush();
-            BufferedReader bin = new BufferedReader(new InputStreamReader(in));
-            String response = bin.readLine();
-            responseMessage(response);
-            in.close();
-            bin.close();
-            pout.close();
-            client.close();
-            return true;
-        }catch (UnknownHostException e) {
-            textMessages.append("Сервер недоступен\n");
-            return false;
-        }catch (IOException e){
-            textMessages.append("Сервер недоступен\n");
-            return false;
-        }
+    private void connected(){
+            client.connected();
+            if (client.getConnection()) {
+                btnBoard.setBackground(Color.GREEN);
+                btnBoard.setText("Connected");
+                btnLogin.setText("Logout");
+                //getLog();
+            } else {
+                textMessages.append(client.getErrorServer() + "\n");
+            }
+
+
+    }
+    private void sendMessage(String msg){
+        client.sendMessage(msg);
+        getMessage();
+//        Socket client;
+//        try {
+//            client = new Socket(textAddress.getText(),Integer.parseInt(textPort.getText()));
+//            InputStream in = client.getInputStream();
+//            PrintWriter pout = new PrintWriter(client.getOutputStream(), true);
+//            pout.println(msg);
+//            pout.flush();
+//            BufferedReader bin = new BufferedReader(new InputStreamReader(in));
+//            String response = bin.readLine();
+//            responseMessage(response);
+//            in.close();
+//            bin.close();
+//            pout.close();
+//            client.close();
+//            return true;
+//        }catch (UnknownHostException e) {
+//            textMessages.append("Сервер недоступен\n");
+//            return false;
+//        }catch (IOException e){
+//            textMessages.append("Сервер недоступен\n");
+//            return false;
+//        }
     }
 }
